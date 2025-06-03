@@ -15,6 +15,12 @@ export class OrdersService {
   async findOrderById(id: number) {
     return this.prisma.order.findUnique({
       where: { id },
+      select: {
+        id: true,
+        userId: true,
+        createdAt: true,
+        items: true,
+      },
     });
   }
 
@@ -32,12 +38,28 @@ export class OrdersService {
   }
 
   async findAllOrders() {
-    return this.prisma.order.findMany();
+    return await this.prisma.order.findMany({
+      select: {
+        id: true,
+        userId: true,
+        createdAt: true,
+        items: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   async findOrdersByUserId(userId: number) {
-    return this.prisma.order.findMany({
+    return await this.prisma.order.findMany({
       where: { userId },
+      select: {
+        id: true,
+        userId: true,
+        createdAt: true,
+        items: true,
+      },
     });
   }
 }

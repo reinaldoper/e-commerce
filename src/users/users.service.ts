@@ -8,7 +8,19 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        password: false,
+        orders: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
   async findOne(id: number) {
     return this.prisma.user.findUnique({

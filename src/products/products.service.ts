@@ -7,12 +7,27 @@ export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return await this.prisma.product.findMany();
+    return await this.prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        createdAt: true,
+        ordersItem: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   async findOne(id: number) {
     return await this.prisma.product.findUnique({
       where: { id },
+      include: {
+        ordersItem: true,
+      },
     });
   }
 
@@ -38,6 +53,14 @@ export class ProductsService {
   async findByName(name: string) {
     return await this.prisma.product.findMany({
       where: { name: { contains: name } },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        createdAt: true,
+        ordersItem: true,
+      },
     });
   }
 }

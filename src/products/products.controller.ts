@@ -74,7 +74,7 @@ export class ProductsController {
     if (!product) {
       throw new NotFoundException({
         statusCode: 404,
-        message: 'User not found',
+        message: 'Product not found',
       });
     }
     return {
@@ -112,7 +112,7 @@ export class ProductsController {
     if (!productExists) {
       throw new NotFoundException({
         statusCode: 404,
-        message: 'User not found',
+        message: 'Product not found',
       });
     }
     const product = await this.productsService.delete(Number(id));

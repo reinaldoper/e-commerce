@@ -13,6 +13,12 @@ export class ItensService {
   async findItemById(id: number) {
     return await this.prisma.orderItem.findUnique({
       where: { id },
+      select: {
+        orderId: true,
+        productId: true,
+        quantity: true,
+        price: true,
+      },
     });
   }
   async updateItem(id: number, itemData: Prisma.OrderItemUpdateInput) {
@@ -27,16 +33,38 @@ export class ItensService {
     });
   }
   async findAllItems() {
-    return await this.prisma.orderItem.findMany();
+    return await this.prisma.orderItem.findMany({
+      select: {
+        orderId: true,
+        productId: true,
+        quantity: true,
+        price: true,
+      },
+      orderBy: {
+        quantity: 'desc',
+      },
+    });
   }
   async findItemsByOrderId(orderId: number) {
     return await this.prisma.orderItem.findMany({
       where: { orderId },
+      select: {
+        orderId: true,
+        productId: true,
+        quantity: true,
+        price: true,
+      },
     });
   }
   async findItemsByProductId(productId: number) {
     return await this.prisma.orderItem.findMany({
       where: { productId },
+      select: {
+        orderId: true,
+        productId: true,
+        quantity: true,
+        price: true,
+      },
     });
   }
 }

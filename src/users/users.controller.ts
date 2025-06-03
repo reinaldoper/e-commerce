@@ -48,6 +48,7 @@ export class UsersController {
   }
 
   @Put('update/:id')
+  @HttpCode(HttpStatus.OK)
   async updateUser(
     @Body() userData: Prisma.UserUpdateInput,
     @Param('id') id: string,
@@ -75,6 +76,7 @@ export class UsersController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(@Body() loginData: Prisma.UserCreateInput) {
     const loginSchema = UserLoginSchema.safeParse(loginData);
     if (!loginSchema.success) {
