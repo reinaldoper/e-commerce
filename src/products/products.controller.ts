@@ -94,10 +94,10 @@ export class ProductsController {
       data: products,
     };
   }
-  @Get('search/:name')
+  @Get('search/:title')
   @HttpCode(HttpStatus.OK)
-  async findProductsByName(@Param('name') name: string) {
-    const products = await this.productsService.findByName(name);
+  async findProductsByName(@Param('title') title: string) {
+    const products = await this.productsService.findByName(title);
     return {
       statusCode: 200,
       message: 'Products found successfully',

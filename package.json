@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate --schema=./prisma/schema.prisma && nest build",
+    "seeds": "npx ts-node prisma/seed.ts",
+    "build": "prisma generate --schema=./prisma/schema.prisma && npm run seeds && nest build",
     "vercel-build": "npm install && npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -27,6 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.8.2",
+    "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "helmet": "^8.1.0",
     "reflect-metadata": "^0.2.2",

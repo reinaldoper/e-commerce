@@ -10,9 +10,12 @@ export class ProductsService {
     return await this.prisma.product.findMany({
       select: {
         id: true,
-        name: true,
+        title: true,
         description: true,
         price: true,
+        rating: true,
+        category: true,
+        image: true,
         createdAt: true,
         ordersItem: true,
       },
@@ -50,14 +53,17 @@ export class ProductsService {
     });
   }
 
-  async findByName(name: string) {
+  async findByName(title: string) {
     return await this.prisma.product.findMany({
-      where: { name: { contains: name } },
+      where: { title: { contains: title } },
       select: {
         id: true,
-        name: true,
+        title: true,
         description: true,
         price: true,
+        rating: true,
+        category: true,
+        image: true,
         createdAt: true,
         ordersItem: true,
       },

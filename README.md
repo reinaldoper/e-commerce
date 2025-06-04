@@ -114,14 +114,14 @@ npm run start:dev
 📌 Endpoints
 - Produtos /products
 
-| Método | Rota            | Descrição               |
-| ------ | --------------- | ----------------------- |
-| POST   | `/create`       | Cria um produto         |
-| PUT    | `/update/:id`   | Atualiza um produto     |
-| GET    | `/find/:id`     | Busca um produto por ID |
-| GET    | `/search/:name` | Busca produtos por nome |
-| GET    | `/all`          | Lista todos os produtos |
-| DELETE | `/delete/:id`   | Deleta um produto       |
+| Método | Rota            | Descrição                    |
+| ------ | --------------- | ---------------------------- |
+| POST   | `/create`       | Cria um produto              |
+| PUT    | `/update/:id`   | Atualiza um produto          |
+| GET    | `/find/:id`     | Busca um produto por ID      |
+| GET    | `/search/:title` | Busca produtos pelo tittulo |
+| GET    | `/all`          | Lista todos os produtos      |
+| DELETE | `/delete/:id`   | Deleta um produto            |
 
 - Pedidos /orders
 
