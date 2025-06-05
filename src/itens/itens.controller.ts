@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -49,8 +50,11 @@ export class ItensController {
         data: item,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -67,18 +71,27 @@ export class ItensController {
     description: 'No items found for this order.',
   })
   async findItemsByOrderId(@Param('orderId') orderId: string) {
-    const items = await this.itensService.findItemsByOrderId(Number(orderId));
-    if (!items || items.length === 0) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'No items found for this order',
-      });
+    try {
+      const items = await this.itensService.findItemsByOrderId(Number(orderId));
+      if (!items || items.length === 0) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'No items found for this order',
+        });
+      }
+      return {
+        statusCode: 200,
+        message: 'Items found successfully',
+        data: items,
+      };
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
+      }
     }
-    return {
-      statusCode: 200,
-      message: 'Items found successfully',
-      data: items,
-    };
   }
   @Get('product/:productId')
   @HttpCode(HttpStatus.OK)
@@ -108,8 +121,11 @@ export class ItensController {
         data: items,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -143,8 +159,11 @@ export class ItensController {
         data: item,
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
       throw new BadRequestException({
         statusCode: 400,
@@ -192,8 +211,11 @@ export class ItensController {
         data: item,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -227,8 +249,11 @@ export class ItensController {
         message: 'Item deleted successfully',
       };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
       throw new BadRequestException({
         statusCode: 400,

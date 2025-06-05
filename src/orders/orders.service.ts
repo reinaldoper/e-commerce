@@ -7,9 +7,15 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createOrder(orderData: Prisma.OrderCreateInput) {
-    return this.prisma.order.create({
-      data: orderData,
-    });
+    try {
+      return this.prisma.order.create({
+        data: orderData,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new Error(error.message);
+      }
+    }
   }
 
   async findOrderById(id: number) {

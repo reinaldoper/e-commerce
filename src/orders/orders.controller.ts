@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -51,6 +52,11 @@ export class OrdersController {
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
+      } else if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -83,8 +89,11 @@ export class OrdersController {
         data: orders,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -115,8 +124,11 @@ export class OrdersController {
         data: order,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -165,8 +177,11 @@ export class OrdersController {
         data: updatedOrder,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
@@ -201,8 +216,11 @@ export class OrdersController {
         message: 'Order deleted successfully',
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'Internal server error',
+        });
       }
     }
   }
