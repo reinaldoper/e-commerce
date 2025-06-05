@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ItensService } from './itens.service';
-import { Prisma } from '@prisma/client';
 import { ItemSchema } from './dto.itens';
+import { CreateItemDto, UpdateItemDto } from './DTO';
 
 @Controller('itens')
 @ApiTags('itens')
@@ -32,21 +32,27 @@ export class ItensController {
     status: 400,
     description: 'Validation failed.',
   })
-  async createItem(@Body() itemData: Prisma.OrderItemCreateInput) {
-    const itemSchema = ItemSchema.safeParse(itemData);
-    if (!itemSchema.success) {
-      throw new BadRequestException({
-        statusCode: 400,
-        message: 'Validation failed',
-        errors: itemSchema.error.errors,
-      });
+  async createItem(@Body() itemData: CreateItemDto) {
+    try {
+      const itemSchema = ItemSchema.safeParse(itemData);
+      if (!itemSchema.success) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Validation failed',
+          errors: itemSchema.error.errors,
+        });
+      }
+      const item = await this.itensService.createItem(itemData);
+      return {
+        statusCode: 201,
+        message: 'Item created successfully',
+        data: item,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
     }
-    const item = await this.itensService.createItem(itemData);
-    return {
-      statusCode: 201,
-      message: 'Item created successfully',
-      data: item,
-    };
   }
 
   @Get('order/:orderId')
@@ -86,20 +92,26 @@ export class ItensController {
     description: 'No items found for this product.',
   })
   async findItemsByProductId(@Param('productId') productId: string) {
-    const items = await this.itensService.findItemsByProductId(
-      Number(productId),
-    );
-    if (!items || items.length === 0) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'No items found for this product',
-      });
+    try {
+      const items = await this.itensService.findItemsByProductId(
+        Number(productId),
+      );
+      if (!items || items.length === 0) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'No items found for this product',
+        });
+      }
+      return {
+        statusCode: 200,
+        message: 'Items found successfully',
+        data: items,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
     }
-    return {
-      statusCode: 200,
-      message: 'Items found successfully',
-      data: items,
-    };
   }
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -112,19 +124,33 @@ export class ItensController {
     status: 404,
     description: 'Item not found.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid ID format.',
+  })
   async findItemById(@Param('id') id: string) {
-    const item = await this.itensService.findItemById(Number(id));
-    if (!item) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'Item not found',
+    try {
+      const item = await this.itensService.findItemById(Number(id));
+      if (!item) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Item not found',
+        });
+      }
+      return {
+        statusCode: 200,
+        message: 'Item found successfully',
+        data: item,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid ID format',
       });
     }
-    return {
-      statusCode: 200,
-      message: 'Item found successfully',
-      data: item,
-    };
   }
 
   @Put('update/:id')
@@ -142,31 +168,34 @@ export class ItensController {
     status: 404,
     description: 'Item not found.',
   })
-  async updateItem(
-    @Body() itemData: Prisma.OrderItemUpdateInput,
-    @Param('id') id: string,
-  ) {
-    const itemSchema = ItemSchema.safeParse(itemData);
-    if (!itemSchema.success) {
-      throw new BadRequestException({
-        statusCode: 400,
-        message: 'Validation failed',
-        errors: itemSchema.error.errors,
-      });
+  async updateItem(@Body() itemData: UpdateItemDto, @Param('id') id: string) {
+    try {
+      const itemSchema = ItemSchema.safeParse(itemData);
+      if (!itemSchema.success) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Validation failed',
+          errors: itemSchema.error.errors,
+        });
+      }
+      const itemExists = await this.itensService.findItemById(Number(id));
+      if (!itemExists) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Item not found',
+        });
+      }
+      const item = await this.itensService.updateItem(Number(id), itemData);
+      return {
+        statusCode: 200,
+        message: 'Item updated successfully',
+        data: item,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
     }
-    const itemExists = await this.itensService.findItemById(Number(id));
-    if (!itemExists) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'Item not found',
-      });
-    }
-    const item = await this.itensService.updateItem(Number(id), itemData);
-    return {
-      statusCode: 200,
-      message: 'Item updated successfully',
-      data: item,
-    };
   }
   @Delete('delete/:id')
   @HttpCode(HttpStatus.OK)
@@ -179,18 +208,32 @@ export class ItensController {
     status: 404,
     description: 'Item not found.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid ID format.',
+  })
   async deleteItem(@Param('id') id: string) {
-    const itemExists = await this.itensService.findItemById(Number(id));
-    if (!itemExists) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'Item not found',
+    try {
+      const itemExists = await this.itensService.findItemById(Number(id));
+      if (!itemExists) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Item not found',
+        });
+      }
+      await this.itensService.deleteItem(Number(id));
+      return {
+        statusCode: 200,
+        message: 'Item deleted successfully',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid ID format',
       });
     }
-    await this.itensService.deleteItem(Number(id));
-    return {
-      statusCode: 200,
-      message: 'Item deleted successfully',
-    };
   }
 }
