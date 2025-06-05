@@ -11,16 +11,20 @@ import {
   HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { Prisma } from '@prisma/client';
 import { ProductSchema } from './dto.products';
 
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Cria um produto' })
+  @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
   async createProduct(@Body() productData: Prisma.ProductCreateInput) {
     const parseProductData = ProductSchema.safeParse(productData);
     if (!parseProductData.success) {
@@ -40,6 +44,10 @@ export class ProductsController {
 
   @Put('update/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Atualiza um produto' })
+  @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
+  @ApiResponse({ status: 400, description: 'Erro de validação.' })
   async updateProduct(
     @Body() productData: Prisma.ProductUpdateInput,
     @Param('id') id: string,
@@ -69,6 +77,9 @@ export class ProductsController {
 
   @Get('find/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Encontra um produto pelo ID' })
+  @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
   async findProduct(@Param('id') id: string) {
     const product = await this.productsService.findOne(Number(id));
     if (!product) {
@@ -86,6 +97,11 @@ export class ProductsController {
 
   @Get('all')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Encontra todos os produtos' })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos encontrados com sucesso.',
+  })
   async findAllProducts() {
     const products = await this.productsService.findAll();
     return {
@@ -94,8 +110,15 @@ export class ProductsController {
       data: products,
     };
   }
+
   @Get('search/:title')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Encontra produtos pelo titulo' })
+  @ApiResponse({
+    status: 200,
+    description: 'Produtos encontrados com sucesso.',
+  })
+  @ApiResponse({ status: 404, description: 'Nenhum produto encontrado.' })
   async findProductsByName(@Param('title') title: string) {
     const products = await this.productsService.findByName(title);
     return {
@@ -107,6 +130,10 @@ export class ProductsController {
 
   @Delete('delete/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Deleta um produto' })
+  @ApiResponse({ status: 200, description: 'Produto deletado com sucesso.' })
+  @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
+  @ApiResponse({ status: 400, description: 'Erro de validação.' })
   async deleteProduct(@Param('id') id: string) {
     const productExists = await this.productsService.findOne(Number(id));
     if (!productExists) {

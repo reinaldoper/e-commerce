@@ -2,6 +2,9 @@
 Esta é uma API desenvolvida com NestJS, Prisma ORM e SQLite, estruturada para gerenciar produtos, pedidos e itens dos pedidos, com validação de dados usando Zod.
 Um e-commerce bem estruturado com todas as validações de rotas e respostas adequadas as requisições.
 
+- **API GERA DOCUMENTAÇÂO ATRAVÈS DO SWAGGER**
+- **APÒS RODAR A APLICAÇÂO, ACESSAR <http://localhost:3000/api>**
+
 ---
 
 🚀 Funcionalidades

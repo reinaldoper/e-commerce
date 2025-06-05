@@ -11,16 +11,27 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ItensService } from './itens.service';
 import { Prisma } from '@prisma/client';
 import { ItemSchema } from './dto.itens';
 
 @Controller('itens')
+@ApiTags('itens')
 export class ItensController {
   constructor(private readonly itensService: ItensService) {}
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new order item' })
+  @ApiResponse({
+    status: 201,
+    description: 'Item created successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed.',
+  })
   async createItem(@Body() itemData: Prisma.OrderItemCreateInput) {
     const itemSchema = ItemSchema.safeParse(itemData);
     if (!itemSchema.success) {
@@ -40,6 +51,15 @@ export class ItensController {
 
   @Get('order/:orderId')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Find all items by order id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Items found successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No items found for this order.',
+  })
   async findItemsByOrderId(@Param('orderId') orderId: string) {
     const items = await this.itensService.findItemsByOrderId(Number(orderId));
     if (!items || items.length === 0) {
@@ -56,6 +76,15 @@ export class ItensController {
   }
   @Get('product/:productId')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Find all items by product id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Items found successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No items found for this product.',
+  })
   async findItemsByProductId(@Param('productId') productId: string) {
     const items = await this.itensService.findItemsByProductId(
       Number(productId),
@@ -74,6 +103,15 @@ export class ItensController {
   }
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Find item by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Item found successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Item not found.',
+  })
   async findItemById(@Param('id') id: string) {
     const item = await this.itensService.findItemById(Number(id));
     if (!item) {
@@ -91,6 +129,19 @@ export class ItensController {
 
   @Put('update/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update an order item' })
+  @ApiResponse({
+    status: 200,
+    description: 'Item updated successfully.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation failed.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Item not found.',
+  })
   async updateItem(
     @Body() itemData: Prisma.OrderItemUpdateInput,
     @Param('id') id: string,
@@ -119,6 +170,15 @@ export class ItensController {
   }
   @Delete('delete/:id')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete an order item' })
+  @ApiResponse({
+    status: 200,
+    description: 'Item deleted successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Item not found.',
+  })
   async deleteItem(@Param('id') id: string) {
     const itemExists = await this.itensService.findItemById(Number(id));
     if (!itemExists) {
