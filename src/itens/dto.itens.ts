@@ -6,3 +6,7 @@ export const ItemSchema = z.object({
   quantity: z.number().int().positive(),
   price: z.number().int().positive(),
 });
+
+export const ItemId = z.object({
+  id: z.number().int().positive().min(1),
+});

@@ -33,6 +33,10 @@ export class ItensController {
     status: 400,
     description: 'Validation failed.',
   })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
   async createItem(@Body() itemData: CreateItemDto) {
     try {
       const itemSchema = ItemSchema.safeParse(itemData);
@@ -55,8 +59,6 @@ export class ItensController {
           statusCode: 500,
           message: 'Internal server error',
         });
-      } else if (error instanceof BadRequestException) {
-        throw error;
       }
     }
   }
@@ -95,6 +97,33 @@ export class ItensController {
       }
     }
   }
+
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Find all items' })
+  @ApiResponse({
+    status: 200,
+    description: 'Items found successfully.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No items found.',
+  })
+  async findAllItems() {
+    const items = await this.itensService.findAllItems();
+    if (!items || items.length === 0) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: 'No items found',
+      });
+    }
+    return {
+      statusCode: 200,
+      message: 'Items found successfully',
+      data: items,
+    };
+  }
+
   @Get('product/:productId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Find all items by product id' })
@@ -143,18 +172,22 @@ export class ItensController {
     description: 'Item not found.',
   })
   @ApiResponse({
+    status: 500,
+    description: 'Internal server error.',
+  })
+  @ApiResponse({
     status: 400,
     description: 'Invalid ID format.',
   })
   async findItemById(@Param('id') id: string) {
     try {
-      const item = await this.itensService.findItemById(Number(id));
-      if (!item) {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Item not found',
+      if (isNaN(Number(id)) || Number(id) <= 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Invalid ID format',
         });
       }
+      const item = await this.itensService.findItemById(Number(id));
       return {
         statusCode: 200,
         message: 'Item found successfully',
@@ -166,11 +199,17 @@ export class ItensController {
           statusCode: 500,
           message: 'Internal server error',
         });
+      } else if (error instanceof NotFoundException) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Item not found',
+        });
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Invalid ID format',
+        });
       }
-      throw new BadRequestException({
-        statusCode: 400,
-        message: 'Invalid ID format',
-      });
     }
   }
 
@@ -191,6 +230,12 @@ export class ItensController {
   })
   async updateItem(@Body() itemData: UpdateItemDto, @Param('id') id: string) {
     try {
+      if (isNaN(Number(id)) || Number(id) <= 0) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Invalid ID format',
+        });
+      }
       const itemSchema = ItemSchema.safeParse(itemData);
       if (!itemSchema.success) {
         throw new BadRequestException({
@@ -217,6 +262,16 @@ export class ItensController {
         throw new InternalServerErrorException({
           statusCode: 500,
           message: 'Internal server error',
+        });
+      } else if (error instanceof NotFoundException) {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Item not found',
+        });
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: 'Invalid ID format',
         });
       }
     }
