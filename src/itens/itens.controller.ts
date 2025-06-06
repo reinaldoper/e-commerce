@@ -55,6 +55,8 @@ export class ItensController {
           statusCode: 500,
           message: 'Internal server error',
         });
+      } else if (error instanceof BadRequestException) {
+        throw error;
       }
     }
   }
