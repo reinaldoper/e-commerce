@@ -25,6 +25,7 @@ export class ProductsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cria um produto' })
   @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
+  @ApiResponse({ status: 400, description: 'Erro de validação.' })
   async createProduct(@Body() productData: Prisma.ProductCreateInput) {
     const parseProductData = ProductSchema.safeParse(productData);
     if (!parseProductData.success) {
@@ -80,7 +81,14 @@ export class ProductsController {
   @ApiOperation({ summary: 'Encontra um produto pelo ID' })
   @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
+  @ApiResponse({ status: 400, description: 'Erro de validação.' })
   async findProduct(@Param('id') id: string) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid user ID',
+      });
+    }
     const product = await this.productsService.findOne(Number(id));
     if (!product) {
       throw new NotFoundException({
@@ -135,6 +143,12 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
   @ApiResponse({ status: 400, description: 'Erro de validação.' })
   async deleteProduct(@Param('id') id: string) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid product ID',
+      });
+    }
     const productExists = await this.productsService.findOne(Number(id));
     if (!productExists) {
       throw new NotFoundException({
