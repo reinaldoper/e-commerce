@@ -25,6 +25,14 @@ export class UsersService {
   async findOne(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        password: false,
+        orders: true,
+      },
     });
   }
   async create(data: Prisma.UserCreateInput) {
@@ -32,6 +40,9 @@ export class UsersService {
     data.password = hashedPassword;
     return this.prisma.user.create({
       data,
+      select: {
+        password: false,
+      },
     });
   }
 
@@ -43,6 +54,13 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        password: false,
+      },
     });
   }
 

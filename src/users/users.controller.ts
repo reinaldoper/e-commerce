@@ -15,9 +15,9 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { Prisma } from '@prisma/client';
 import { UserSchema, UserLoginSchema } from './dto.users';
 import * as bcrypt from 'bcrypt';
+import { UserSchemaDto, UserLoginSchemaDto } from './DTO';
 
 @Controller('users')
 @ApiTags('users')
@@ -35,7 +35,11 @@ export class UsersController {
     status: 400,
     description: 'Validation failed.',
   })
-  async register(@Body() userData: Prisma.UserCreateInput) {
+  @ApiResponse({
+    status: 409,
+    description: 'User with this email already exists.',
+  })
+  async register(@Body() userData: UserSchemaDto) {
     const userSchema = UserSchema.safeParse(userData);
     if (!userSchema.success) {
       throw new BadRequestException({
@@ -73,10 +77,13 @@ export class UsersController {
     status: 400,
     description: 'Validation failed.',
   })
-  async updateUser(
-    @Body() userData: Prisma.UserUpdateInput,
-    @Param('id') id: string,
-  ) {
+  async updateUser(@Body() userData: UserSchemaDto, @Param('id') id: string) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid user ID',
+      });
+    }
     const userSchema = UserSchema.safeParse(userData);
     if (!userSchema.success) {
       throw new BadRequestException({
@@ -114,7 +121,7 @@ export class UsersController {
     status: 400,
     description: 'Validation failed.',
   })
-  async login(@Body() loginData: Prisma.UserCreateInput) {
+  async login(@Body() loginData: UserLoginSchemaDto) {
     const loginSchema = UserLoginSchema.safeParse(loginData);
     if (!loginSchema.success) {
       throw new BadRequestException({
@@ -132,7 +139,6 @@ export class UsersController {
     return {
       statusCode: 200,
       message: 'Login successful',
-      data: user,
     };
   }
 
@@ -147,7 +153,17 @@ export class UsersController {
     status: 404,
     description: 'User not found.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid user ID.',
+  })
   async findUser(@Param('id') id: string) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid user ID',
+      });
+    }
     const user = await this.usersService.findOne(Number(id));
     if (!user) {
       throw new NotFoundException({
@@ -193,7 +209,17 @@ export class UsersController {
     status: 404,
     description: 'User not found.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid user ID.',
+  })
   async deleteUser(@Param('id') id: string) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: 'Invalid user ID',
+      });
+    }
     const user = await this.usersService.findOne(Number(id));
     if (!user) {
       throw new NotFoundException({
